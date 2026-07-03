@@ -8,6 +8,8 @@ The build is three layers. The raw transactions start in Azure cloud storage, ar
 
 There is no fraud-detection model here, on purpose. The dataset carries a fraud flag, but this project focuses on making a reported figure reconcile to the source.
 
+A narrative walkthrough of the build and the benchmark is on my portfolio: [paytrail: building a payments warehouse](https://devikabuilds.pages.dev/notes/paytrail-payments-lakehouse/).
+
 ## Why I built this
 
 I built paytrail in July 2026 to go deep on Databricks and the data-engineering problems particular to payments. The platform side uses Delta Lake, Unity Catalog, Asset Bundles, and Workflows. The domain side uses medallion modelling, reconciliation we can audit to the penny, and governance over sensitive account identifiers.
