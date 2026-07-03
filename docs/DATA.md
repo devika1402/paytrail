@@ -101,8 +101,8 @@ per type rather than a raw count, and why the overall rate is a small fraction o
 percent.
 
 There is no fraud-detection model in this project, and that is deliberate. The dataset
-carries the fraud flag, but the demanding part is making a reported figure reconcile
-to the source, which is what this pipeline does.
+carries the fraud flag, but this pipeline focuses on making a reported figure reconcile
+to the source.
 
 ---
 
