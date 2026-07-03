@@ -1,7 +1,5 @@
 # paytrail: a payments medallion lakehouse
 
-<!-- Still to add above the fold when ready: a short walkthrough video (kept for last). -->
-
 paytrail is a small payments warehouse over roughly 6.3M synthetic transactions. It turns them into a daily settled-volume report and checks the figures along the way, so any number can be traced back to the row it came from.
 
 ![paytrail architecture: Azure ADLS Gen2 to bronze to silver to gold star schema to the daily settled-volume mart, governed by Unity Catalog and orchestrated by a Databricks Asset Bundle and Workflow](docs/diagrams/architecture.png)
@@ -9,6 +7,10 @@ paytrail is a small payments warehouse over roughly 6.3M synthetic transactions.
 The build is three layers. The raw transactions start in Azure cloud storage, arrive in the warehouse exactly as received to keep a faithful record of the input, get cleaned and reconciled into a middle layer the downstream models build on, and finally get shaped into the tables a regulator or a product manager reads from. Bad rows are quarantined with a reason so nothing is silently discarded, re-runs never double-count, and late-arriving transactions are placed in the right window. It runs on Databricks with Delta Lake, the modelling and the data-quality tests are written in dbt, and the whole thing is governed by Unity Catalog.
 
 There is no fraud-detection model here, on purpose. The dataset carries a fraud flag, but this project focuses on making a reported figure reconcile to the source.
+
+## Why I built this
+
+I built paytrail in July 2026 to go deep on Databricks and the data-engineering problems particular to payments. The platform side uses Delta Lake, Unity Catalog, Asset Bundles, and Workflows. The domain side uses medallion modelling, reconciliation we can audit to the penny, and governance over sensitive account identifiers.
 
 ## Documentation map
 
@@ -91,7 +93,7 @@ The benchmark is candid about what did not happen. Z-order file pruning never ki
 
 ## Scope
 
-- **Azure is storage integration (ADLS Gen2).** The source is stored in and read from Azure Data Lake Storage Gen2. & the compute is Databricks Free Edition (AWS-hosted) (see [docs/AZURE.md](docs/AZURE.md)).
+- **Azure is storage integration (ADLS Gen2).** The source is stored in and read from Azure Data Lake Storage Gen2, and the compute is Databricks Free Edition (AWS-hosted) (see [docs/AZURE.md](docs/AZURE.md)).
 - **The data is synthetic (PaySim).**
 
 ## Stack
