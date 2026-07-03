@@ -1,0 +1,104 @@
+version: 2
+
+models:
+  - name: dim_transaction_type
+    description: The five PaySim transaction types with descriptions and flow direction.
+    columns:
+      - name: transaction_type
+        data_tests:
+          - unique
+          - not_null
+          - accepted_values:
+              values: [CASH_IN, CASH_OUT, TRANSFER, PAYMENT, DEBIT]
+      - name: flow_direction
+        data_tests:
+          - accepted_values:
+              values: [inflow, outflow, transfer]
+
+  - name: dim_date
+    description: Contiguous daily calendar spine over the event window.
+    columns:
+      - name: date_key
+        data_tests: [unique, not_null]
+
+  - name: dim_account
+    description: Conformed account dimension (tokenised key, type, activity window).
+    columns:
+      - name: account_key
+        data_tests: [unique, not_null]
+      - name: account_type
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [customer, merchant]
+
+  - name: dim_customer
+    description: Customer accounts with an originated-volume profile and a segment band.
+    columns:
+      - name: customer_key
+        data_tests: [unique, not_null]
+      - name: segment
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [high, medium, low]
+
+  - name: fact_transaction
+    description: >
+      One row per settled transaction (grain transaction_id). FKs to every
+      dimension; measures amount + fraud flags. Incremental MERGE on transaction_id.
+    columns:
+      - name: transaction_id
+        data_tests: [unique, not_null]
+      - name: amount
+        data_tests: [not_null]
+      - name: date_key
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_date')
+              field: date_key
+      - name: transaction_type
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_transaction_type')
+              field: transaction_type
+      - name: orig_account_key
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_account')
+              field: account_key
+      - name: dest_account_key
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_account')
+              field: account_key
+      - name: orig_customer_key
+        description: Customer FK (null for merchant originators; nulls skipped by the test).
+        data_tests:
+          - relationships:
+              to: ref('dim_customer')
+              field: customer_key
+
+  - name: mart_daily_settled_volume
+    description: >
+      Daily settled volume by transaction type and customer segment. Serves a
+      regulatory-reporting-style daily aggregate (reconciled, auditable) and the PM
+      dashboard (segment/market exploration). No real regulator is named.
+    columns:
+      - name: mart_key
+        data_tests: [unique, not_null]
+      - name: transaction_type
+        data_tests:
+          - relationships:
+              to: ref('dim_transaction_type')
+              field: transaction_type
+      - name: customer_segment
+        data_tests:
+          - accepted_values:
+              values: [high, medium, low]
+      - name: settled_amount
+        data_tests: [not_null]

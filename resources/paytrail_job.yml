@@ -1,0 +1,25 @@
+# paytrail pipeline job, deployed Databricks Workflow (Asset Bundle).
+#
+# What it runs: a serverless SQL **governance gate** (resources/sql/pipeline_gate.sql)
+# that fails the run if the pipeline output is untrustworthy (gold empty or silver
+# reconciliation broken). `make all` deploys this bundle and runs the job after the
+# transforms, so the deployed Workflow gates the pipeline end-to-end on serverless.
+#
+# Why not the full ingest→silver→gold→tests DAG as job tasks:
+#   * dbt-task and python/wheel tasks require CLASSIC job compute, which Databricks
+#     Free Edition does not provide (serverless only). The dbt-task attempt failed
+#     with "Cannot launch the cluster" on Free Edition.
+#   * Per the planned fallback, dbt OWNS the transform DAG and runs from the Makefile
+#     (`make dbt`); bronze extraction runs on the local orchestrator (it holds the
+#     Azure credentials). The deployed job runs the serverless gate above.
+# serverless SQL tasks ARE supported here, so the gate runs on serverless.
+resources:
+  jobs:
+    paytrail_pipeline:
+      name: paytrail-pipeline
+      tasks:
+        - task_key: pipeline_gate
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: ./sql/pipeline_gate.sql

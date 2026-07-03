@@ -1,0 +1,25 @@
+# dbt connection profile.
+# Auth is OAuth U2M: `auth_type: oauth` reuses the token cached by
+# `databricks auth login`, no PAT, no secret stored here, safe to commit.
+paytrail:
+  target: dev
+  outputs:
+    dev:
+      type: databricks
+      catalog: paytrail
+      schema: silver
+      host: "{{ env_var('DATABRICKS_HOST', 'placeholder.cloud.databricks.com') }}"
+      http_path: "{{ env_var('DATABRICKS_HTTP_PATH', '/sql/1.0/warehouses/placeholder') }}"
+      auth_type: oauth
+      threads: 4
+    # CI target, token auth from env/secrets. Placeholders let `dbt parse`
+    # (structural validation, no connection) run with no secrets configured. A
+    # full `dbt build` runs only when the workflow's secrets are present.
+    ci:
+      type: databricks
+      catalog: paytrail
+      schema: silver
+      host: "{{ env_var('DATABRICKS_HOST', 'placeholder.cloud.databricks.com') }}"
+      http_path: "{{ env_var('DATABRICKS_HTTP_PATH', '/sql/1.0/warehouses/placeholder') }}"
+      token: "{{ env_var('DATABRICKS_TOKEN', 'placeholder-token') }}"
+      threads: 4

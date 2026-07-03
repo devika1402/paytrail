@@ -1,0 +1,28 @@
+name: 'paytrail'
+version: '1.0.0'
+config-version: 2
+
+# Connection profile, defined in dbt/profiles.yml (used with --profiles-dir dbt).
+profile: 'paytrail'
+
+model-paths: ['models']
+analysis-paths: ['analyses']
+test-paths: ['tests']
+seed-paths: ['seeds']
+macro-paths: ['macros']
+snapshot-paths: ['snapshots']
+
+clean-targets:
+  - 'target'
+  - 'dbt_packages'
+
+# Layer materializations (per PRD): silver = trust manufacturing, gold = star schema.
+# Per-model overrides (fact -> incremental merge, dims -> table).
+models:
+  paytrail:
+    silver:
+      +schema: silver
+      +materialized: table
+    gold:
+      +schema: gold
+      +materialized: table

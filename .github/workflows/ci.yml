@@ -1,0 +1,52 @@
+# CI, the merge gate. Runs on every push / PR.
+#
+# Always (no warehouse needed): ruff, mypy, sqlfluff, and `dbt parse` (structural
+# validation, models compile, refs/sources resolve, tests are declared).
+#
+# Data-quality gate: `dbt build` (which runs every dbt test) executes only when the
+# Databricks warehouse secrets are configured on the repo. A failing dbt test then
+# fails the workflow. Without secrets the job still gates on lint + parse, so the
+# pipeline can't merge structurally broken SQL even before a warehouse is wired up.
+# (Free Edition uses OAuth locally. CI uses a PAT via secrets.)
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint-and-validate:
+    runs-on: ubuntu-latest
+    env:
+      # Empty unless the repo has these secrets; the dbt-build step keys off them.
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_HTTP_PATH: ${{ secrets.DATABRICKS_HTTP_PATH }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+          pip install -e .
+
+      - name: Ruff (Python lint)
+        run: ruff check src setup
+
+      - name: Mypy (type check)
+        run: mypy src setup
+
+      - name: sqlfluff (SQL lint)
+        run: sqlfluff lint dbt/models dbt/tests
+
+      - name: dbt parse (structural validation, no warehouse)
+        run: dbt parse --profiles-dir dbt --project-dir dbt --target ci
+
+      - name: dbt build (data-quality gate, runs only when warehouse secrets are set)
+        if: ${{ env.DATABRICKS_HOST != '' }}
+        run: dbt build --profiles-dir dbt --project-dir dbt --target ci

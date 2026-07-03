@@ -1,0 +1,43 @@
+# paytrail, packaging + lint/type config.
+# Declares the `paytrail` package (src layout) so it is importable everywhere via
+# `pip install -e .`, scripts, tests, and CI all import `paytrail.*` without
+# PYTHONPATH juggling. Runtime/dev deps stay in requirements*.txt (the source of
+# truth for pinned installs); this file only names the package + tool config.
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "paytrail"
+version = "0.0.0"
+description = "Payments medallion lakehouse, Delta bronze/silver/gold on Databricks, dbt, Unity Catalog."
+requires-python = ">=3.11"
+# Concrete pinned installs live in requirements.txt; this list is intentionally
+# unpinned metadata so the two never drift into a second lockfile.
+dependencies = [
+    "databricks-sdk",
+    "azure-storage-blob",
+    "python-dotenv",
+    "pandas",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "setup"]
+
+[tool.ruff.lint]
+# Enforce the ground rules where a linter can: pyflakes (F), pycodestyle (E/W),
+# import order (I), bugbear (B, catches bare-ish except patterns), pyupgrade (UP).
+select = ["E", "W", "F", "I", "B", "UP"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+# Azure/Databricks/pandas ship partial or no stubs; don't fail the type gate on
+# third-party imports we don't control.
+ignore_missing_imports = true

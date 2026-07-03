@@ -1,0 +1,18 @@
+# paytrail runtime dependencies (the pipeline itself). Dev/lint deps live in
+# requirements-dev.txt, which installs this file too. Install into a venv:
+#   python3 -m venv .venv && ./.venv/bin/pip install -r requirements-dev.txt
+
+# Databricks SQL warehouse client, runs setup DDL and the write path.
+databricks-sdk
+
+# Azure ADLS Gen2 source landing + read. The PaySim source is stored
+# in and read from ADLS via account-key auth (connection string in .env), so
+# no azure-identity/managed-identity dependency is needed on this path.
+azure-storage-blob
+
+# .env loader, the ADLS connection string contains ';' and cannot be sourced
+# in a POSIX shell, so credentials are read in Python instead.
+python-dotenv
+
+# CSV handling for the source landing + 10k smoke sample.
+pandas

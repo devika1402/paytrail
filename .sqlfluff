@@ -1,0 +1,32 @@
+# sqlfluff config, lints the dbt SQL models in CI without a live warehouse.
+# The jinja templater + dbt builtins resolve ref()/source()/config()/is_incremental()
+# to placeholders, so models lint offline (no dbt compile / warehouse needed).
+[sqlfluff]
+dialect = databricks
+templater = jinja
+max_line_length = 100
+# Excluded, with reasons:
+#   CP02, identifiers: bronze keeps PaySim's real camelCase column names
+#           (nameOrig, isFraud, …); lowercasing them would break the SQL.
+#   LT05, long lines: max_line_length already governs; avoids double-flagging comments.
+#   RF02/RF04, qualification/keyword-as-name: noisy on single-source CTE chains.
+#   ST06, select-clause ordering: our column order is deliberate (keys first).
+#   AL05, "unused alias": false-positive on `VALUES (...) AS t(col, …)`, where the
+#           alias NAMES the columns and is load-bearing (dim_transaction_type).
+exclude_rules = CP02, LT05, RF02, RF04, ST06, AL05
+
+[sqlfluff:templater:jinja]
+apply_dbt_builtins = true
+
+[sqlfluff:indentation]
+tab_space_size = 4
+indent_unit = space
+
+[sqlfluff:layout:type:comma]
+line_position = trailing
+
+[sqlfluff:rules:capitalisation.keywords]
+capitalisation_policy = lower
+
+[sqlfluff:rules:capitalisation.functions]
+extended_capitalisation_policy = lower

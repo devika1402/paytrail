@@ -1,0 +1,17 @@
+# Dev / build dependencies for paytrail. Install into a venv:
+#   python3 -m venv .venv && ./.venv/bin/pip install -r requirements-dev.txt
+#
+# Runtime deps (databricks-sdk, azure-storage-blob, pandas, python-dotenv) come from:
+-r requirements.txt
+
+# dbt + adapter: models, tests, and warehouse connectivity.
+dbt-databricks
+
+# Lint / type gates: ruff + mypy + sqlfluff, enforced in CI.
+ruff
+mypy<2  # mypy 2.x requires pathspec>=1.0, which conflicts with dbt's pathspec<0.13.
+sqlfluff  # SQL lint for the dbt models (jinja templater, no warehouse needed)
+
+# Pin: dbt-core needs pathspec<0.13; mypy<2 is compatible with it. Holds the resolver
+# to a version both accept (mypy 2.x would force >=1.0 and break dbt).
+pathspec==0.12.1

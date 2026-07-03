@@ -1,0 +1,22 @@
+# Databricks Asset Bundle, paytrail
+# Deploys the pipeline governance-gate job (resources/paytrail_job.yml), which the
+# deployed Workflow runs on serverless. dbt/python job tasks need classic compute
+# (absent on Free Edition), so dbt owns the transform DAG from the Makefile, see
+# resources/paytrail_job.yml.
+bundle:
+  name: paytrail
+
+include:
+  - resources/*.yml
+
+variables:
+  warehouse_id:
+    description: Serverless SQL warehouse id for the sql_task steps. Override per environment.
+    default: your-warehouse-id
+
+targets:
+  dev:
+    default: true
+    mode: development
+    # Workspace host and auth resolve from the Databricks CLI profile
+    # (DATABRICKS_CONFIG_PROFILE) or the DATABRICKS_HOST env var.

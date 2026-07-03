@@ -1,0 +1,31 @@
+{
+  "paytrail.bronze.transactions_raw": [],
+  "paytrail.silver.stg_transactions": [
+    "paytrail.bronze.transactions_raw"
+  ],
+  "paytrail.silver.transactions": [
+    "paytrail.silver.stg_transactions"
+  ],
+  "paytrail.silver.transactions_quarantine": [
+    "paytrail.silver.stg_transactions"
+  ],
+  "paytrail.gold.fact_transaction": [
+    "paytrail.silver.transactions"
+  ],
+  "paytrail.gold.dim_account": [
+    "paytrail.silver.transactions"
+  ],
+  "paytrail.gold.dim_customer": [
+    "paytrail.gold.dim_account",
+    "paytrail.silver.transactions"
+  ],
+  "paytrail.gold.dim_date": [
+    "paytrail.silver.transactions"
+  ],
+  "paytrail.gold.dim_transaction_type": [],
+  "paytrail.gold.mart_daily_settled_volume": [
+    "paytrail.gold.dim_customer",
+    "paytrail.gold.dim_date",
+    "paytrail.gold.fact_transaction"
+  ]
+}

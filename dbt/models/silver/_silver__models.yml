@@ -1,0 +1,83 @@
+version: 2
+
+models:
+  - name: stg_transactions
+    description: >
+      Typed, conformed, validated projection of bronze. One row per bronze row;
+      _quarantine_reason is NULL for clean rows. Identifiers are tokenised (sha2)
+      so no raw account id flows past silver.
+
+  - name: transactions
+    description: >
+      Silver clean. One row per settled payment event (grain: transaction_id =
+      hash of step+type+orig+dest+amount). Deduplicated and idempotent, a
+      replayed bronze batch does not inflate this table. Ordering is by event_ts
+      (the event clock), independent of arrival order (_load_ts).
+    columns:
+      - name: transaction_id
+        description: Stable hash of the natural grain; the event key.
+        data_tests: [unique, not_null]
+      - name: event_ts
+        description: Event timestamp derived from PaySim step (synthetic anchor).
+        data_tests: [not_null]
+      - name: txn_type
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [CASH_IN, CASH_OUT, TRANSFER, PAYMENT, DEBIT]
+      - name: amount
+        description: Settled amount, decimal(18,2), non-negative.
+        data_tests: [not_null]
+      - name: orig_account_key
+        description: Tokenised originator key (sha2).
+        data_tests: [not_null]
+      - name: orig_account_type
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [customer, merchant]
+      - name: dest_account_key
+        description: Tokenised destination key (sha2).
+        data_tests: [not_null]
+      - name: dest_account_type
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [customer, merchant]
+      - name: is_fraud
+        data_tests: [not_null]
+
+  - name: transactions_quarantine
+    description: >
+      Silver quarantine. Contract-failing rows, captured not dropped, each tagged
+      with the reason it breached. The quarantine count is a data-quality signal.
+    columns:
+      - name: _quarantine_reason
+        description: The first data contract the row breached.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - null_account_key
+                - invalid_step
+                - unparseable_amount
+                - negative_amount
+                - negative_balance
+                - unknown_actor_type
+
+  - name: audit_silver_reconciliation
+    description: >
+      One-row reconciliation control across the silver boundary (counts + amounts).
+      Backed by the assert_silver_reconciliation test, which fails the build if the
+      identity bronze = quarantine + clean_eligible does not hold.
+    columns:
+      - name: rows_tie
+        data_tests:
+          - accepted_values:
+              values: [true]
+              quote: false
+      - name: amount_tie
+        data_tests:
+          - accepted_values:
+              values: [true]
+              quote: false

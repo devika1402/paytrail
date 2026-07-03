@@ -1,0 +1,23 @@
+version: 2
+
+sources:
+  - name: bronze
+    catalog: paytrail
+    schema: bronze
+    description: >
+      Raw, append-only landing of the PaySim source from ADLS Gen2. Every
+      column is STRING; typing and validation happen here in silver.
+    tables:
+      - name: transactions_raw
+        description: Raw PaySim transactions plus _source_file / _load_ts metadata.
+        loaded_at_field: _load_ts
+        freshness:
+          # The source is a batch file, not a stream; a wide window just flags a
+          # stale-catalog mistake rather than enforcing real-time SLAs.
+          warn_after: {count: 30, period: day}
+          error_after: {count: 90, period: day}
+        columns:
+          - name: nameOrig
+            description: Originator account id (masked to ***last4 for non-ETL principals).
+          - name: nameDest
+            description: Destination account id (masked to ***last4 for non-ETL principals).
