@@ -45,6 +45,13 @@ raw id at all (defence in depth: mask at the raw layer, tokenise at the trust
 boundary). On Free Edition a single principal plays both roles, and a dedicated ETL
 service principal separates them cleanly in production.
 
+The sha2 token is a pseudonym rather than anonymisation. An account id is
+low-entropy and structured, so an unsalted hash of it is recoverable by brute force
+or a precomputed table, which means the token conceals the raw string from
+downstream tables but is not a control-worthy anonymiser on its own. On production
+data the token would use a keyed hash (HMAC, with the key held apart from the data)
+or a separately-held salt, so the mapping cannot be recovered without the secret.
+
 The mask is bound to a column with `ALTER TABLE ... ALTER COLUMN ... SET MASK`, and the
 engine then applies the function to that column on every read, transparently, across all
 query paths. There is no unmasked view to leak through. The two account-identifier

@@ -138,8 +138,11 @@ the pipeline and are not columns in the source data. Reading them as if they wer
 data would be a mistake, so they are named here.
 
 - **Tokenised account keys.** Raw account ids are hashed (turned into a fixed
-  fingerprint) so no original id flows past the silver layer. The customer/merchant
-  letter is read first, then discarded.
+  fingerprint) so no original id flows past the silver layer. The hash is a
+  pseudonym rather than anonymisation: an account id is low-entropy, so an unsalted
+  hash of it can be brute-forced, and a production version would use a keyed hash
+  (HMAC) or a held-back salt. The customer/merchant letter is read first, then
+  discarded.
 - **Event timestamp and calendar.** Derived from `step` as described above.
 - **Customer segment (high / medium / low).** Not in the source. It is a band computed
   by splitting customers into three equal groups by their total originated amount, the
