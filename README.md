@@ -68,7 +68,7 @@ The gold mart feeds a Databricks AI/BI (Lakeview) dashboard: a product manager's
 
 ![paytrail dashboard, per-type profile: ranked horizontal bars of settled volume, transaction count, average ticket size, and fraud rate for each of the five transaction types (CASH_IN, CASH_OUT, TRANSFER, PAYMENT, DEBIT)](docs/dashboards/daily_settled_volume_by_type.png)
 
-**Reading it.** Every figure is a direct `SUM` or `COUNT` over the mart. Three fields are engineered rather than raw PaySim columns, and reading these correctly depends on knowing which:
+**Reading it.** Three of the fields on the dashboard are derived by the pipeline rather than taken straight from PaySim. What each one means:
 
 - **Customer segment** (high / medium / low) is not in the source. It is a tertile of each customer's total originated amount, the volume band a product manager slices markets by. Because the band is *defined* by volume, the "settled volume by segment" bar is partly definitional (the high band leads by construction), so read it as the spread of activity across bands.
 - **"Settled" is a reporting frame over the whole dataset.** PaySim has no settlement state, so settled volume is the sum of every transaction amount, fraud included. The mart demonstrates the daily-reconciliation pattern and leaves every row in place.
