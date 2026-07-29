@@ -12,7 +12,7 @@ A narrative walkthrough of the build and the benchmark is on my portfolio: [payt
 
 ## Why I built this
 
-I built paytrail in July 2026 to go deep on Databricks and the data-engineering problems particular to payments. The platform side uses Delta Lake, Unity Catalog, Asset Bundles, and Workflows. The domain side uses medallion modelling, reconciliation we can audit to the penny, and governance over sensitive account identifiers.
+I built paytrail in July 2026 to learn more about Databricks and the data-engineering problems particular to payments. The platform side uses Delta Lake, Unity Catalog, Asset Bundles, and Workflows. The domain side uses medallion modelling, reconciliation we can audit to the penny, and governance over sensitive account identifiers.
 
 ## Documentation map
 
