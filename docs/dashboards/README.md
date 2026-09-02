@@ -22,8 +22,7 @@ series. Ranked bars with value labels keep every type readable and comparable.
 
 ## Screenshots
 
-Free Edition workspaces are ephemeral and there is no public dashboard URL, so the
-shareable artefact is a screenshot. The dashboard was captured on the full 6.36M-row
+The dashboard was captured on the full 6.36M-row
 mart and saved here as two images (the page is taller than one viewport):
 
 - [`daily_settled_volume_overview.png`](daily_settled_volume_overview.png), the top of
